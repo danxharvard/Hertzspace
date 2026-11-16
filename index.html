@@ -138,20 +138,23 @@
       <section data-step="email">
         <p class="eyebrow">Account</p>
         <h2 id="account-title">Sign in or create an account</h2>
-        <p class="muted step-why">We'll email you a sign-in link. No password needed.</p>
+        <p class="muted step-why">We'll email you a link to sign in. No password needed.</p>
         <input type="email" name="email" autocomplete="email" inputmode="email" placeholder="you@example.com" aria-label="Email address" required>
-        <button type="button" class="primary-btn" data-action="send-code">Email me a code</button>
+        <button type="button" class="primary-btn" data-action="send-code">Email me a sign-in link</button>
       </section>
 
       <section data-step="code">
         <p class="eyebrow">Check your email</p>
-        <h2>Open the email we sent</h2>
-        <p class="muted">We sent a sign-in email to <b class="sent-to"></b>. Tap the link in it, or type the code if there is one. It can take a minute to arrive, so check your spam folder too.</p>
-        <input type="text" name="code" class="code-input" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" maxlength="10" placeholder="123456" aria-label="Sign-in code">
-        <button type="button" class="primary-btn" data-action="verify-code">Sign in with code</button>
+        <h2>Tap the link in your email</h2>
+        <p class="muted">We sent a sign-in link to <b class="sent-to"></b>. Open it on this device and you'll come straight back here, signed in. It can take a minute to arrive, so check your spam folder too.</p>
+        <details class="code-alt">
+          <summary>Got a code instead?</summary>
+          <input type="text" name="code" class="code-input" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" maxlength="10" placeholder="123456" aria-label="Sign-in code">
+          <button type="button" class="primary-btn" data-action="verify-code">Sign in with code</button>
+        </details>
         <div class="row-links">
           <button type="button" class="link-btn" data-action="change-email">Use a different email</button>
-          <button type="button" class="link-btn" data-action="resend-code">Resend code</button>
+          <button type="button" class="link-btn" data-action="resend-code">Resend email</button>
         </div>
       </section>
 

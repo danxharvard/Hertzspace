@@ -297,6 +297,10 @@ body.player-open .mini { display: none; }
 .primary-btn:disabled, .danger-btn:disabled { opacity: .5; }
 .ghost-btn, .danger-btn { padding: 12px 16px; border-radius: 14px; font-weight: 600; font-size: 14.5px; background: var(--surface-2); flex: 1; }
 .danger-btn { color: #f08a80; }
+.code-alt { display: grid; gap: 12px; }
+.code-alt[open] { padding-top: 2px; }
+.code-alt summary { font-size: 13.5px; color: var(--muted); cursor: pointer; }
+.code-alt[open] summary { margin-bottom: 2px; }
 .row-links { display: flex; justify-content: space-between; gap: 12px; }
 .acct-plan { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--bg); }
 .plan-badge { font-weight: 600; font-size: 15px; color: var(--muted); }

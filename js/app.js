@@ -471,7 +471,7 @@ function showStep(step) {
   status("");
   deleteArmed = false;
   $(".delete-note", accountDialog).hidden = true;
-  const focus = { email: "input[name=email]", code: "input[name=code]" }[step];
+  const focus = { email: "input[name=email]" }[step];
   if (focus) setTimeout(() => $(focus, accountDialog).focus(), 50);
 }
 
