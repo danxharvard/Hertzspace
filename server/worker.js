@@ -27,11 +27,14 @@ const json = (data, status = 200) =>
 // ---------- Supabase ----------
 
 function sb(env, path, init = {}) {
+  const key = env.SUPABASE_SERVICE_ROLE_KEY;
+  // New-style secret keys (sb_secret_...) go only in `apikey`; legacy service_role JWTs also as Bearer.
+  const bearer = key.startsWith("sb_") ? {} : { Authorization: `Bearer ${key}` };
   return fetch(`${env.SUPABASE_URL}${path}`, {
     ...init,
     headers: {
-      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+      apikey: key,
+      ...bearer,
       "Content-Type": "application/json",
       ...(init.headers || {}),
     },
