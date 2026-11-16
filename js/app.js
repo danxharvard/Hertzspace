@@ -662,8 +662,11 @@ $("[data-year]").textContent = new Date().getFullYear();
   state.catalog.frequencies.forEach((f) => state.byId.set(f.id, f));
   await refreshOffline();
   render();
+  try {
+    if (await auth.fromLink()) toast("You're signed in.");
+  } catch (e) { toast(e.message); }
   renderAccountBtn();
-  refreshMe();
+  await refreshMe();
   const fromHash = state.byId.get(location.hash.slice(1));
   select(fromHash || state.catalog.frequencies.find((f) => f.tier === "free"), { openSheet: false });
   syncLayout();

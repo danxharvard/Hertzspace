@@ -53,7 +53,31 @@ export class Auth extends EventTarget {
 
   /** Step 1: email a sign-in code (creates the account if it's new). */
   sendCode(email) {
-    return this._req("/otp", { body: { email, create_user: true } });
+    const back = encodeURIComponent(location.origin + location.pathname);
+    return this._req(`/otp?redirect_to=${back}`, { body: { email, create_user: true } });
+  }
+
+  /** Finish sign-in when the user arrives from the link in the email (#access_token=...). */
+  async fromLink() {
+    const h = new URLSearchParams(location.hash.slice(1));
+    const q = new URLSearchParams(location.search);
+    const clean = () => history.replaceState(null, "", location.pathname);
+    if (h.get("error_description") || q.get("error_description")) {
+      clean();
+      throw new Error("That sign-in link has expired or was already used. Request a new one.");
+    }
+    const access = h.get("access_token");
+    if (!access) return false;
+    clean();
+    const user = await this._req("/user", { method: "GET", token: access });
+    this._save({
+      access_token: access,
+      refresh_token: h.get("refresh_token"),
+      expires_at: Number(h.get("expires_at")) || undefined,
+      expires_in: Number(h.get("expires_in")) || 3600,
+      user,
+    });
+    return true;
   }
 
   /** Step 2: exchange the emailed code for a session. */
