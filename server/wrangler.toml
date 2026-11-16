@@ -4,7 +4,7 @@ compatibility_date = "2026-11-01"
 
 [vars]
 ALLOWED_ORIGIN = "https://danxharvard.github.io"
-SUPABASE_URL = "https://YOUR-PROJECT.supabase.co"
+SUPABASE_URL = "https://bgftzvltxjjgxlslcjsm.supabase.co"
 
 [[r2_buckets]]
 binding = "AUDIO"

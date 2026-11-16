@@ -496,6 +496,7 @@ function renderAccount() {
   badge.textContent = isPlus() ? "Hertzspace Plus" : "Free plan";
   badge.classList.toggle("plus", isPlus());
   $(".acct-plan [data-action=open-plus]", accountDialog).hidden = isPlus();
+  $("[data-action=delete-account]", accountDialog).hidden = !API; // needs the server
 }
 
 function renderAccountBtn() {
