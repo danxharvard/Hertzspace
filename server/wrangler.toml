@@ -1,0 +1,14 @@
+name = "hertzspace-api"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://danxharvard.github.io"
+
+[[r2_buckets]]
+binding = "AUDIO"
+bucket_name = "hertzspace-audio"
+
+# Secrets: set these with
+#   npx wrangler secret put STRIPE_SECRET_KEY
+#   npx wrangler secret put TOKEN_SECRET

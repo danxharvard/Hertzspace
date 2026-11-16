@@ -1,0 +1,239 @@
+{
+  "categories": [
+    {
+      "id": "tinnitus",
+      "name": "Tinnitus relief",
+      "blurb": "Broadband sound to soften the contrast between silence and ringing. Set the volume just below your tinnitus, never above it."
+    },
+    {
+      "id": "solfeggio",
+      "name": "Solfeggio tones",
+      "blurb": "Pure tones from the Solfeggio scale, popular in meditation and sound-bath practice."
+    },
+    {
+      "id": "binaural",
+      "name": "Binaural beats",
+      "blurb": "A slightly different tone in each ear. Your brain hears the difference as a slow pulse. Headphones required."
+    },
+    {
+      "id": "tuning",
+      "name": "Tuning",
+      "blurb": "Single reference tones for relaxation and musical practice."
+    }
+  ],
+  "frequencies": [
+    {
+      "id": "white-noise",
+      "category": "tinnitus",
+      "type": "noise",
+      "color": "white",
+      "name": "White noise",
+      "hz": "Full spectrum",
+      "short": "Even, bright masking",
+      "about": "Equal energy at every frequency. The brightest of the noises, good for masking high-pitched ringing and busy rooms.",
+      "tier": "free"
+    },
+    {
+      "id": "pink-noise",
+      "category": "tinnitus",
+      "type": "noise",
+      "color": "pink",
+      "name": "Pink noise",
+      "hz": "1/f spectrum",
+      "short": "Balanced, like steady rain",
+      "about": "Softer in the highs than white noise, so it sounds like steady rain or wind. A common choice for tinnitus sound therapy and for sleep.",
+      "tier": "free"
+    },
+    {
+      "id": "brown-noise",
+      "category": "tinnitus",
+      "type": "noise",
+      "color": "brown",
+      "name": "Brown noise",
+      "hz": "1/f² spectrum",
+      "short": "Deep, like a distant waterfall",
+      "about": "Weighted towards low frequencies, with a deep rumble like a waterfall or the inside of a plane. Many people find it the most relaxing to sleep to.",
+      "tier": "free"
+    },
+    {
+      "id": "ocean-swell",
+      "category": "tinnitus",
+      "type": "swell",
+      "color": "pink",
+      "name": "Ocean swell",
+      "hz": "Modulated pink",
+      "short": "Slow waves rolling in",
+      "about": "Pink noise that rises and falls every ten seconds or so, like waves on a shore. Gentler on the ear than steady noise for long sessions.",
+      "tier": "plus"
+    },
+    {
+      "id": "174hz",
+      "category": "solfeggio",
+      "type": "tone",
+      "freq": 174,
+      "name": "174 Hz",
+      "hz": "174 Hz",
+      "short": "Grounding",
+      "about": "The lowest Solfeggio tone. Listeners often use it as a warm, grounding drone at the start of a session.",
+      "tier": "plus"
+    },
+    {
+      "id": "396hz",
+      "category": "solfeggio",
+      "type": "tone",
+      "freq": 396,
+      "name": "396 Hz",
+      "hz": "396 Hz",
+      "short": "Letting go",
+      "about": "Traditionally linked with releasing tension and worry.",
+      "tier": "plus"
+    },
+    {
+      "id": "528hz",
+      "category": "solfeggio",
+      "type": "tone",
+      "freq": 528,
+      "name": "528 Hz",
+      "hz": "528 Hz",
+      "short": "Love frequency",
+      "about": "The best-known Solfeggio tone, often called the love frequency. A bright, clear tone used widely in meditation music.",
+      "tier": "free"
+    },
+    {
+      "id": "528hz-bath",
+      "category": "solfeggio",
+      "type": "bath",
+      "freq": 528,
+      "name": "528 Hz sound bath",
+      "hz": "528 Hz + harmonics",
+      "short": "Layered, shimmering drone",
+      "about": "528 Hz layered with soft harmonics and a slow shimmer, closer to a singing bowl than a pure tone.",
+      "tier": "plus"
+    },
+    {
+      "id": "639hz",
+      "category": "solfeggio",
+      "type": "tone",
+      "freq": 639,
+      "name": "639 Hz",
+      "hz": "639 Hz",
+      "short": "Connection",
+      "about": "Traditionally linked with harmony and relationships.",
+      "tier": "plus"
+    },
+    {
+      "id": "741hz",
+      "category": "solfeggio",
+      "type": "tone",
+      "freq": 741,
+      "name": "741 Hz",
+      "hz": "741 Hz",
+      "short": "Clarity",
+      "about": "Traditionally associated with clarity and expression.",
+      "tier": "plus"
+    },
+    {
+      "id": "852hz",
+      "category": "solfeggio",
+      "type": "tone",
+      "freq": 852,
+      "name": "852 Hz",
+      "hz": "852 Hz",
+      "short": "Intuition",
+      "about": "A high, airy tone traditionally linked with intuition and stillness.",
+      "tier": "plus"
+    },
+    {
+      "id": "963hz",
+      "category": "solfeggio",
+      "type": "tone",
+      "freq": 963,
+      "name": "963 Hz",
+      "hz": "963 Hz",
+      "short": "Awareness",
+      "about": "The highest Solfeggio tone. Keep the volume low: high tones feel louder than they look.",
+      "tier": "plus"
+    },
+    {
+      "id": "delta-sleep",
+      "category": "binaural",
+      "type": "binaural",
+      "carrier": 150,
+      "beat": 2,
+      "name": "Deep sleep",
+      "hz": "2 Hz delta",
+      "short": "Delta waves for deep rest",
+      "about": "A 2 Hz beat over a 150 Hz tone. Delta rhythms are the brain's slowest, seen in deep sleep. Use lying down with headphones.",
+      "tier": "plus"
+    },
+    {
+      "id": "theta-meditation",
+      "category": "binaural",
+      "type": "binaural",
+      "carrier": 200,
+      "beat": 6,
+      "name": "Meditation",
+      "hz": "6 Hz theta",
+      "short": "Theta for drifting, dreamy states",
+      "about": "A 6 Hz beat over a 200 Hz tone. Theta rhythms appear in light sleep and deep meditation.",
+      "tier": "plus"
+    },
+    {
+      "id": "schumann",
+      "category": "binaural",
+      "type": "binaural",
+      "carrier": 200,
+      "beat": 7.83,
+      "name": "Schumann resonance",
+      "hz": "7.83 Hz",
+      "short": "The Earth's own rhythm",
+      "about": "A 7.83 Hz beat, matching the main electromagnetic resonance of the Earth's atmosphere. A favourite for calm, grounded meditation.",
+      "tier": "plus"
+    },
+    {
+      "id": "alpha-calm",
+      "category": "binaural",
+      "type": "binaural",
+      "carrier": 220,
+      "beat": 10,
+      "name": "Calm focus",
+      "hz": "10 Hz alpha",
+      "short": "Alpha for relaxed alertness",
+      "about": "A 10 Hz beat over a 220 Hz tone. Alpha rhythms are linked with being awake but relaxed, eyes closed.",
+      "tier": "free"
+    },
+    {
+      "id": "gamma-focus",
+      "category": "binaural",
+      "type": "binaural",
+      "carrier": 300,
+      "beat": 40,
+      "name": "Deep focus",
+      "hz": "40 Hz gamma",
+      "short": "Gamma for concentration",
+      "about": "A 40 Hz beat over a 300 Hz tone. 40 Hz gamma stimulation is an active research area.",
+      "tier": "plus"
+    },
+    {
+      "id": "432hz",
+      "category": "tuning",
+      "type": "tone",
+      "freq": 432,
+      "name": "432 Hz",
+      "hz": "432 Hz",
+      "short": "Verdi tuning",
+      "about": "A slightly lower A than the modern 440 Hz standard. Many listeners describe it as warmer and softer.",
+      "tier": "free"
+    }
+  ],
+  "plus": {
+    "name": "Hertzspace Plus",
+    "price": "£4.99",
+    "priceNote": "one-off",
+    "perks": [
+      "Unlock 12 extra frequencies",
+      "Download any frequency to your device",
+      "Listen offline, anywhere"
+    ]
+  }
+}
