@@ -24,7 +24,13 @@
           <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".35"/><path d="M5 16c2.2-6 4.4-6 6.6 0s4.4 6 6.6 0 4.4-6 6.6 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <span>Hertz<b>space</b></span>
         </a>
-        <button class="plus-pill" data-action="open-plus" hidden>Plus</button>
+        <div class="top-actions">
+          <button class="plus-pill" data-action="open-plus" hidden>Plus</button>
+          <button class="account-btn" data-action="open-account" aria-label="Account">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.3-3.6 4.2-5.4 7.5-5.4s6.2 1.8 7.5 5.4"/></svg>
+            <span class="account-initial" hidden></span>
+          </button>
+        </div>
       </header>
 
       <div class="intro">
@@ -112,19 +118,58 @@
       <div class="price"><span class="amount"></span> <span class="note"></span></div>
       <a class="buy-btn" href="#" rel="noopener">Unlock Plus</a>
       <p class="plus-status tiny" aria-live="polite"></p>
-      <p class="tiny muted">Payments are handled securely by Stripe.</p>
-      <details class="restore">
-        <summary>Already bought Plus on another device?</summary>
-        <p class="tiny muted">Enter the unlock code shown after your purchase.</p>
-        <div class="restore-row">
-          <input type="text" name="code" autocomplete="off" spellcheck="false" placeholder="Unlock code" aria-label="Unlock code">
-          <button type="button" data-action="restore">Restore</button>
+      <p class="tiny muted">Payments are handled securely by Stripe. Plus is linked to your account, so it works on every device you sign in on.</p>
+      <button type="button" class="link-btn signin-link" data-action="open-account">Already bought Plus? Sign in</button>
+    </form>
+  </dialog>
+
+  <dialog class="account-sheet" aria-labelledby="account-title">
+    <form method="dialog" class="sheet-card" novalidate>
+      <button class="icon-btn x" value="close" aria-label="Close">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+
+      <section data-step="off">
+        <p class="eyebrow">Account</p>
+        <h2>Accounts are coming soon</h2>
+        <p class="muted">The free frequencies don't need an account. You'll be able to sign in here soon.</p>
+      </section>
+
+      <section data-step="email">
+        <p class="eyebrow">Account</p>
+        <h2 id="account-title">Sign in or create an account</h2>
+        <p class="muted step-why">We'll email you a 6-digit code. No password needed.</p>
+        <input type="email" name="email" autocomplete="email" inputmode="email" placeholder="you@example.com" aria-label="Email address" required>
+        <button type="button" class="primary-btn" data-action="send-code">Email me a code</button>
+      </section>
+
+      <section data-step="code">
+        <p class="eyebrow">Check your email</p>
+        <h2>Enter your code</h2>
+        <p class="muted">We sent a code to <b class="sent-to"></b>. It can take a minute to arrive, so check your spam folder too.</p>
+        <input type="text" name="code" class="code-input" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" maxlength="10" placeholder="123456" aria-label="Sign-in code">
+        <button type="button" class="primary-btn" data-action="verify-code">Sign in</button>
+        <div class="row-links">
+          <button type="button" class="link-btn" data-action="change-email">Use a different email</button>
+          <button type="button" class="link-btn" data-action="resend-code">Resend code</button>
         </div>
-      </details>
-      <div class="my-code" hidden>
-        <p class="tiny muted">Your unlock code. Use it to unlock Plus on your other devices:</p>
-        <code></code>
-      </div>
+      </section>
+
+      <section data-step="account">
+        <p class="eyebrow">Your account</p>
+        <h2 class="acct-email"></h2>
+        <div class="acct-plan">
+          <span class="plan-badge"></span>
+          <button type="button" class="primary-btn small" data-action="open-plus">Go Plus</button>
+        </div>
+        <div class="acct-actions">
+          <button type="button" class="ghost-btn" data-action="sign-out">Sign out</button>
+          <button type="button" class="danger-btn" data-action="delete-account">Delete account</button>
+        </div>
+        <p class="tiny muted delete-note" hidden>This permanently deletes your account and your Plus purchase. Tap again to confirm.</p>
+      </section>
+
+      <p class="form-status tiny" aria-live="polite"></p>
     </form>
   </dialog>
 

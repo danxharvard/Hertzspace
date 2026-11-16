@@ -37,25 +37,33 @@ python3 -m http.server 8000
 
 Settings → Pages → Source: *Deploy from a branch* → `main` / root. The site will be at `https://danxharvard.github.io/Hertzspace/`.
 
-## Switching on payments
+## Accounts and payments
 
-The free site works without any of this. To sell Plus:
+The free site works without any of this. Accounts use **Supabase** (sign-in by emailed 6-digit code, no passwords). Plus is stored against the account, so it works on every device the buyer signs in on.
 
-1. **Stripe.** Create a product "Hertzspace Plus" and a **Payment Link**. Under *After payment*, redirect to
+1. **Supabase** (free tier). Create a project, then:
+   - SQL Editor → run `server/schema.sql`.
+   - Authentication → Sign In / Providers → Email: enabled. Turn **off** "Confirm email" (the code itself confirms it).
+   - Authentication → Emails → **Magic Link** template: replace the link with the code, e.g. `<h2>Your Hertzspace code</h2><p>{{ .Token }}</p>`.
+   - Authentication → URL Configuration → Site URL: `https://danxharvard.github.io/Hertzspace/`.
+   - For real launch, add your own SMTP (e.g. Resend) under Authentication → Emails, because Supabase's built-in email is rate-limited.
+2. **Stripe.** Create a product "Hertzspace Plus" and a **Payment Link**. Under *After payment*, redirect to
    `https://danxharvard.github.io/Hertzspace/?session_id={CHECKOUT_SESSION_ID}`.
-2. **Cloudflare (free tier is enough).** Create an R2 bucket `hertzspace-audio` and upload:
+   Add a webhook (Developers → Webhooks) pointing at `https://<your-worker>/stripe-webhook` for `checkout.session.completed`.
+3. **Cloudflare (free tier is enough).** Create an R2 bucket `hertzspace-audio` and upload:
    - `premium/stream/*.flac` → `stream/`
    - `premium/downloads/*` → `downloads/`
-3. **Deploy the API** in `server/`:
+4. **Deploy the API** in `server/`. Set `SUPABASE_URL` in `wrangler.toml`, then:
    ```sh
    cd server
+   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
    npx wrangler secret put STRIPE_SECRET_KEY
-   npx wrangler secret put TOKEN_SECRET     # any long random string
+   npx wrangler secret put STRIPE_WEBHOOK_SECRET
    npx wrangler deploy
    ```
-4. Put the Payment Link and the Worker URL into `js/config.js`, then commit.
+5. Fill in `js/config.js` (Supabase URL + anon key, Payment Link, Worker URL) and commit.
 
-After paying, buyers return to the site and Plus unlocks on that device. They're shown an unlock code to use on their other devices.
+How a purchase works: buyers sign in first, the Payment Link carries their account id to Stripe, and Plus is granted when they return to the site (or by the webhook if they close the tab). Users can sign out or delete their account (and data) from the account screen.
 
 ## Wording
 

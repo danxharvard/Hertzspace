@@ -4,11 +4,13 @@ compatibility_date = "2026-11-01"
 
 [vars]
 ALLOWED_ORIGIN = "https://danxharvard.github.io"
+SUPABASE_URL = "https://YOUR-PROJECT.supabase.co"
 
 [[r2_buckets]]
 binding = "AUDIO"
 bucket_name = "hertzspace-audio"
 
 # Secrets: set these with
+#   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 #   npx wrangler secret put STRIPE_SECRET_KEY
-#   npx wrangler secret put TOKEN_SECRET
+#   npx wrangler secret put STRIPE_WEBHOOK_SECRET

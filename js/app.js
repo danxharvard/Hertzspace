@@ -1,9 +1,11 @@
 import { Player } from "./player.js";
 import { Viz } from "./viz.js";
+import { Auth } from "./auth.js";
 
 const CFG = window.HERTZSPACE_CONFIG || {};
 const API = (CFG.apiBase || "").replace(/\/$/, "");
-const TOKEN_KEY = "hz.plus";
+const PLUS_KEY = "hz.plus";
+const PENDING_KEY = "hz.pendingCheckout";
 const VOL_KEY = "hz.volume";
 const OFFLINE_CACHE = "hz-offline-v1";
 
@@ -27,7 +29,7 @@ const state = {
   byId: new Map(),
   filter: "all",
   selected: null,
-  token: store.get(TOKEN_KEY),
+  plus: store.get(PLUS_KEY) === "1",
   timerEnd: 0,
   timerId: 0,
   offline: new Set(),
@@ -35,7 +37,8 @@ const state = {
 
 const player = new Player();
 const viz = new Viz($(".viz"), () => player.analyser);
-const isPlus = () => !!state.token;
+const auth = new Auth({ url: CFG.supabaseUrl, anonKey: CFG.supabaseAnonKey });
+const isPlus = () => state.plus && !!auth.user;
 const isLocked = (item) => item.tier === "plus" && !isPlus();
 
 // ---------- audio sources ----------
@@ -45,10 +48,14 @@ async function fetchAudio(item) {
     const hit = await caches.open(OFFLINE_CACHE).then((c) => c.match(offlineKey(item))).catch(() => null);
     if (hit) return hit.arrayBuffer();
   }
-  const res = await fetch(sourceUrl(item), sourceInit(item));
-  if (res.status === 401 || res.status === 403) {
-    lockOut();
-    throw new Error("Your Plus unlock code wasn't accepted.");
+  const res = await fetch(sourceUrl(item), await sourceInit(item));
+  if (res.status === 401) {
+    await auth.signOut();
+    throw new Error("Your session has expired. Please sign in again.");
+  }
+  if (res.status === 403) {
+    setPlus(false);
+    throw new Error("This one needs Hertzspace Plus.");
   }
   if (!res.ok) throw new Error(`Couldn't load audio (${res.status})`);
   return res.arrayBuffer();
@@ -57,8 +64,8 @@ async function fetchAudio(item) {
 function sourceUrl(item) {
   return item.tier === "free" ? `audio/free/${item.id}.flac` : `${API}/stream/${item.id}`;
 }
-function sourceInit(item) {
-  return item.tier === "free" ? {} : { headers: { Authorization: `Bearer ${state.token}` } };
+async function sourceInit(item) {
+  return item.tier === "free" ? {} : { headers: { Authorization: `Bearer ${await auth.token()}` } };
 }
 function offlineKey(item) {
   return new Request(new URL(`offline/${item.id}.flac`, location.href));
@@ -82,7 +89,7 @@ async function toggleOffline(item, btn) {
     btn.disabled = true;
     btn.textContent = "Saving…";
     try {
-      const res = await fetch(sourceUrl(item), sourceInit(item));
+      const res = await fetch(sourceUrl(item), await sourceInit(item));
       if (!res.ok) throw new Error(res.status);
       await cache.put(offlineKey(item), res);
       state.offline.add(item.id);
@@ -234,12 +241,13 @@ function renderActions() {
   save.addEventListener("click", () => toggleOffline(item, save));
   box.append(save);
   ["mp3", "flac"].forEach((fmt) => {
-    const a = document.createElement("a");
-    a.className = "btn ghost";
-    a.textContent = `Download ${fmt.toUpperCase()}`;
-    a.href = `${API}/download/${item.id}.${fmt}?token=${encodeURIComponent(state.token)}`;
-    a.setAttribute("download", `Hertzspace - ${item.name}.${fmt}`);
-    box.append(a);
+    const b = button(`Download ${fmt.toUpperCase()}`, "ghost");
+    b.addEventListener("click", async () => {
+      const t = await auth.token();
+      if (!t) return openAccount();
+      location.href = `${API}/download/${item.id}.${fmt}?token=${encodeURIComponent(t)}`;
+    });
+    box.append(b);
   });
 }
 
@@ -375,57 +383,196 @@ function openPlus() {
   $(".amount", dialog).textContent = plus.price;
   $(".note", dialog).textContent = plus.priceNote;
   const buy = $(".buy-btn", dialog);
-  const ready = CFG.stripePaymentLink && API;
-  buy.href = ready ? CFG.stripePaymentLink : "#";
-  buy.classList.toggle("disabled", !ready);
+  const ready = !!(CFG.stripePaymentLink && API && auth.enabled);
+  const user = auth.user;
   buy.hidden = isPlus();
-  $(".restore", dialog).hidden = isPlus();
+  buy.classList.toggle("disabled", !ready);
+  if (ready && user) {
+    const u = new URL(CFG.stripePaymentLink);
+    u.searchParams.set("client_reference_id", user.id);
+    u.searchParams.set("prefilled_email", user.email);
+    buy.href = u.toString();
+    buy.textContent = "Unlock Plus";
+  } else {
+    buy.href = "#";
+    buy.textContent = ready ? "Sign in to unlock" : "Unlock Plus";
+  }
+  $(".signin-link", dialog).hidden = !!user || !auth.enabled;
   $(".plus-status", dialog).textContent = isPlus()
-    ? "Plus is unlocked on this device."
+    ? "Plus is unlocked on your account."
     : ready ? "" : "Checkout opens soon.";
-  const mine = $(".my-code", dialog);
-  mine.hidden = !isPlus();
-  $("code", mine).textContent = state.token || "";
   $("#plus-title").textContent = isPlus() ? "You're on Plus" : "Unlock the full library";
-  dialog.showModal();
+  if (accountDialog.open) accountDialog.close();
+  if (!dialog.open) dialog.showModal();
 }
 
-async function redeem(params) {
-  if (!API) throw new Error("Checkout isn't connected yet.");
-  const res = await fetch(`${API}/unlock?${new URLSearchParams(params)}`);
-  if (!res.ok) throw new Error(res.status === 402 ? "That payment hasn't completed." : "That code wasn't recognised.");
-  const { token } = await res.json();
-  unlock(token);
-}
-
-function unlock(token) {
-  state.token = token;
-  store.set(TOKEN_KEY, token);
+function setPlus(on) {
+  state.plus = !!on;
+  store.set(PLUS_KEY, on ? "1" : null);
   renderLists();
   renderPlusPill();
+  renderAccountBtn();
   if (state.selected) select(state.selected, { openSheet: false });
 }
 
-function lockOut() {
-  state.token = null;
-  store.set(TOKEN_KEY, null);
-  renderLists();
-  renderPlusPill();
-  if (state.selected) select(state.selected, { openSheet: false });
+/** Ask the API whether this account has Plus. Keeps the last known answer when offline. */
+async function refreshMe() {
+  if (!auth.user || !API) return setPlus(false);
+  try {
+    const res = await fetch(`${API}/me`, { headers: { Authorization: `Bearer ${await auth.token()}` } });
+    if (res.status === 401) return auth.signOut();
+    if (res.ok) setPlus((await res.json()).plus);
+  } catch {
+    setPlus(state.plus);
+  }
+}
+
+async function redeemCheckout(sessionId) {
+  const res = await fetch(`${API}/unlock`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${await auth.token()}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sessionId }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error === "unpaid" ? "That payment hasn't completed yet." : data.error || "We couldn't confirm that purchase.");
+  store.set(PENDING_KEY, null);
+  setPlus(true);
+  toast("Welcome to Plus. Everything is unlocked.");
 }
 
 async function handleCheckoutReturn() {
-  const sid = new URLSearchParams(location.search).get("session_id");
+  const sid = new URLSearchParams(location.search).get("session_id") || store.get(PENDING_KEY);
   if (!sid) return;
   history.replaceState(null, "", location.pathname + location.hash);
-  try {
-    await redeem({ session_id: sid });
-    toast("Welcome to Plus. Everything is unlocked.");
-    openPlus();
-  } catch (e) {
-    toast(e.message);
+  if (!auth.user) {
+    // e.g. checkout finished in a different browser: sign in, then we'll finish up.
+    store.set(PENDING_KEY, sid);
+    toast("Payment received. Sign in to finish unlocking Plus.");
+    openAccount();
+    return;
   }
+  try { await redeemCheckout(sid); } catch (e) { toast(e.message); }
 }
+
+async function clearOfflineAudio() {
+  if (!("caches" in window)) return;
+  await caches.delete(OFFLINE_CACHE).catch(() => {});
+  state.offline.clear();
+}
+
+// ---------- account ----------
+
+const accountDialog = $(".account-sheet");
+let pendingEmail = "";
+let deleteArmed = false;
+
+function showStep(step) {
+  $$("section[data-step]", accountDialog).forEach((sec) => (sec.hidden = sec.dataset.step !== step));
+  status("");
+  deleteArmed = false;
+  $(".delete-note", accountDialog).hidden = true;
+  const focus = { email: "input[name=email]", code: "input[name=code]" }[step];
+  if (focus) setTimeout(() => $(focus, accountDialog).focus(), 50);
+}
+
+function status(msg, ok = false) {
+  const el = $(".form-status", accountDialog);
+  el.textContent = msg;
+  el.classList.toggle("ok", ok);
+}
+
+function openAccount() {
+  if (dialog.open) dialog.close();
+  if (!auth.enabled) showStep("off");
+  else if (auth.user) renderAccount();
+  else showStep(pendingEmail ? "code" : "email");
+  if (!accountDialog.open) accountDialog.showModal();
+}
+
+function renderAccount() {
+  showStep("account");
+  $(".acct-email", accountDialog).textContent = auth.user.email;
+  const badge = $(".plan-badge", accountDialog);
+  badge.textContent = isPlus() ? "Hertzspace Plus" : "Free plan";
+  badge.classList.toggle("plus", isPlus());
+  $(".acct-plan [data-action=open-plus]", accountDialog).hidden = isPlus();
+}
+
+function renderAccountBtn() {
+  const btn = $(".account-btn");
+  const initial = $(".account-initial");
+  const u = auth.user;
+  btn.classList.toggle("signed-in", !!u);
+  btn.classList.toggle("plus", isPlus());
+  initial.hidden = !u;
+  $("svg", btn).style.display = u ? "none" : "";
+  initial.textContent = u ? u.email[0].toUpperCase() : "";
+  btn.setAttribute("aria-label", u ? `Account (${u.email})` : "Sign in");
+}
+
+async function busy(btn, fn) {
+  btn.disabled = true;
+  try { await fn(); } catch (e) { status(friendly(e)); } finally { btn.disabled = false; }
+}
+
+function friendly(e) {
+  if (e.status === 429) return "Too many attempts. Please wait a minute and try again.";
+  if (/expired|invalid/i.test(e.message)) return "That code is wrong or has expired. Try again or resend.";
+  if (e instanceof TypeError) return "Couldn't connect. Check your internet connection.";
+  return e.message || "Something went wrong.";
+}
+
+async function sendCode(btn) {
+  const input = $("input[name=email]", accountDialog);
+  const email = input.value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return status("Enter a valid email address.");
+  await busy(btn, async () => {
+    await auth.sendCode(email);
+    pendingEmail = email;
+    $(".sent-to", accountDialog).textContent = email;
+    $("input[name=code]", accountDialog).value = "";
+    showStep("code");
+  });
+}
+
+async function verifyCode(btn) {
+  const code = $("input[name=code]", accountDialog).value.replace(/\D/g, "");
+  if (code.length < 6) return status("Enter the code from your email.");
+  await busy(btn, async () => {
+    await auth.verify(pendingEmail, code);
+    pendingEmail = "";
+    await refreshMe();
+    if (store.get(PENDING_KEY)) await handleCheckoutReturn();
+    if (isPlus()) { renderAccount(); toast("Signed in. Plus is unlocked."); }
+    else { accountDialog.close(); toast("You're signed in."); if (state.wantPlus) openPlus(); }
+    state.wantPlus = false;
+  });
+}
+
+async function deleteAccount(btn) {
+  if (!deleteArmed) {
+    deleteArmed = true;
+    $(".delete-note", accountDialog).hidden = false;
+    btn.textContent = "Confirm delete";
+    return;
+  }
+  await busy(btn, async () => {
+    const res = await fetch(`${API}/account`, { method: "DELETE", headers: { Authorization: `Bearer ${await auth.token()}` } });
+    if (!res.ok) throw new Error("We couldn't delete your account. Please try again.");
+    auth.forget();
+    accountDialog.close();
+    toast("Your account has been deleted.");
+  });
+  btn.textContent = "Delete account";
+}
+
+auth.addEventListener("change", async () => {
+  if (!auth.user) {
+    await clearOfflineAudio();
+    setPlus(false);
+  }
+  renderAccountBtn();
+});
 
 // ---------- misc ----------
 
@@ -460,21 +607,36 @@ document.addEventListener("click", (e) => {
     case "open-player": openPlayer(); break;
     case "close-player": closePlayer(); break;
     case "open-plus": openPlus(); break;
-    case "restore": {
-      const code = $(".restore input", dialog).value.trim();
-      if (!code) return;
-      redeem({ code }).then(() => { toast("Plus restored on this device."); openPlus(); }).catch((err) => {
-        $(".plus-status", dialog).textContent = err.message;
-      });
-      break;
-    }
+    case "open-account": openAccount(); break;
+    case "send-code": sendCode(el); break;
+    case "resend-code": $("input[name=email]", accountDialog).value = pendingEmail; sendCode(el); break;
+    case "verify-code": verifyCode(el); break;
+    case "change-email": pendingEmail = ""; showStep("email"); break;
+    case "sign-out": auth.signOut(); accountDialog.close(); toast("Signed out."); break;
+    case "delete-account": deleteAccount(el); break;
   }
 });
 
 $(".buy-btn").addEventListener("click", (e) => {
-  if (e.currentTarget.classList.contains("disabled")) e.preventDefault();
+  if (e.currentTarget.classList.contains("disabled")) return e.preventDefault();
+  if (!auth.user) {
+    e.preventDefault();
+    state.wantPlus = true;
+    openAccount();
+  }
 });
-dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
+[dialog, accountDialog].forEach((d) => d.addEventListener("click", (e) => { if (e.target === d) d.close(); }));
+// Enter key submits the current step.
+accountDialog.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  const step = $("section[data-step]:not([hidden])", accountDialog)?.dataset.step;
+  const btn = { email: "[data-action=send-code]", code: "[data-action=verify-code]" }[step];
+  if (btn) { e.preventDefault(); $(btn, accountDialog).click(); }
+});
+// Auto-submit once a full code is typed or pasted.
+$("input[name=code]").addEventListener("input", (e) => {
+  if (e.target.value.replace(/\D/g, "").length === 6) $("[data-action=verify-code]", accountDialog).click();
+});
 
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space" && !e.target.closest("input, button, a, textarea, dialog")) {
@@ -500,6 +662,8 @@ $("[data-year]").textContent = new Date().getFullYear();
   state.catalog.frequencies.forEach((f) => state.byId.set(f.id, f));
   await refreshOffline();
   render();
+  renderAccountBtn();
+  refreshMe();
   const fromHash = state.byId.get(location.hash.slice(1));
   select(fromHash || state.catalog.frequencies.find((f) => f.tier === "free"), { openSheet: false });
   syncLayout();

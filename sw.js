@@ -1,8 +1,8 @@
 // App shell cache so Hertzspace opens offline. Audio saved by Plus members
 // lives in a separate cache ("hz-offline-v1") managed by the app itself.
-const SHELL = "hz-shell-v2";
+const SHELL = "hz-shell-v3";
 const FILES = [
-  "./", "index.html", "css/style.css", "js/config.js", "js/app.js", "js/player.js", "js/viz.js",
+  "./", "index.html", "css/style.css", "js/config.js", "js/app.js", "js/auth.js", "js/player.js", "js/viz.js",
   "data/catalog.json", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png",
 ];
 
