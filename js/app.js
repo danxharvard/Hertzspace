@@ -19,6 +19,7 @@ const ACCENT = {
   solfeggio: "#e9b872",
   binaural: "#ab9cf0",
   tuning: "#ee917f",
+  golden: "#e7a6c8",
 };
 
 const state = {
@@ -176,6 +177,7 @@ function glyph(item) {
     swell: "M2 12c2-5 4-5 6 0s4 5 6 0 4-5 6 0",
     tone: "M2 12c1.7-6 3.3-6 5 0s3.3 6 5 0 3.3-6 5 0 3.3 6 5 0",
     bath: "M2 12c1.7-6 3.3-6 5 0s3.3 6 5 0 3.3-6 5 0 3.3 6 5 0M2 12c2.5-3 5-3 7.5 0s5 3 7.5 0 2.5-1.5 5-1",
+    cascade: "M3 4h18M5 8h14M7 12h10M9 16h6M11 20h2",
     binaural: "M2 9c1.7-4 3.3-4 5 0s3.3 4 5 0 3.3-4 5 0 3.3 4 5 0M2 15c2-4 4-4 6 0s4 4 6 0 4-4 6 0",
   };
   return `<svg viewBox="0 0 24 24"><path d="${paths[item.type]}"/></svg>`;

@@ -3,7 +3,7 @@
 Calming noise, Solfeggio tones and binaural beats that play in the browser on mobile and desktop. Built with plain HTML, CSS and JavaScript: no frameworks and no build step. It installs to the home screen as an app (PWA).
 
 - **6 free frequencies** stream straight from this repo (`audio/free/`).
-- **Hertzspace Plus** (one-off payment) unlocks 12 more, plus downloads and offline listening.
+- **Hertzspace Plus** (one-off payment) unlocks 16 more, plus downloads and offline listening.
 
 ## Library
 
@@ -12,6 +12,7 @@ Calming noise, Solfeggio tones and binaural beats that play in the browser on mo
 | White noise, Pink noise, Brown noise | Ocean swell |
 | 528 Hz, 432 Hz | 174, 396, 639, 741, 852, 963 Hz, 528 Hz sound bath |
 | Calm focus (10 Hz alpha binaural) | Deep sleep (2 Hz), Meditation (6 Hz), Schumann (7.83 Hz), Deep focus (40 Hz) |
+| | Golden ratio cascades: Golden 528, Golden 432, Golden 396, Golden drift |
 
 The whole catalogue (names, descriptions, free/paid tier) lives in `data/catalog.json`.
 

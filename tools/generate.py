@@ -61,12 +61,51 @@ def render(item, seconds):
         parts = [(f, 0.5), (snap(f + 0.5, seconds), 0.35), (f / 2, 0.3), (f * 1.5, 0.12), (f * 2, 0.1)]
         x = sum(sine(snap(p, seconds), n) * a for p, a in parts)
         return (x / np.max(np.abs(x)) * 0.3)[:, None]
+    if kind == "cascade":
+        return cascade(item, n, seconds)
     if kind == "binaural":
         c = item["carrier"]
         left = sine(snap(c, seconds), n)
         right = sine(snap(c + item["beat"], seconds), n)
         return np.stack([left, right], axis=1) * 0.3
     raise ValueError(kind)
+
+
+PHI = (1 + 5 ** 0.5) / 2
+
+
+def cascade(item, n, seconds):
+    """Golden-ratio cascade.
+
+    Tones at base * phi^k (k = kmin..kmax) enter one by one from the highest
+    down, `step` seconds apart, hold, then all release together at the end of
+    each `cycle`. Even k sits in the left ear, odd k in the right. Highs are
+    gently tilted down so the stack isn't harsh.
+    """
+    base, cycle, step = item["freq"], item.get("cycle", 7.0), item.get("step", 0.5)
+    kmin, kmax = item.get("kmin", -5), item.get("kmax", 7)
+    attack, release = item.get("attack", 0.04), item.get("release", 0.15)
+    t = np.arange(n) / SR
+    pos = t % cycle
+    out = np.zeros((n, 2))
+    for i, k in enumerate(range(kmax, kmin - 1, -1)):
+        f = base * PHI ** k
+        if not 30 <= f <= 16000:
+            continue
+        f = snap(f, cycle)  # whole cycles per loop -> seamless
+        start = i * step
+        if start >= cycle - release:
+            continue
+        # raised-cosine gate: fade in at `start`, fade out over the last `release` s
+        a = np.clip((pos - start) / attack, 0, 1)
+        r = np.clip((cycle - pos) / release, 0, 1)
+        gate = (0.5 - 0.5 * np.cos(np.pi * a)) * (0.5 - 0.5 * np.cos(np.pi * r))
+        tilt = 1.0 if f < 3000 else (3000 / f) ** 0.5   # -3 dB/octave above 3 kHz
+        ch = 0 if k % 2 == 0 else 1
+        out[:, ch] += np.sin(2 * np.pi * f * t) * gate * tilt
+        if k == 0:  # the base tone sits in both ears
+            out[:, 1] += np.sin(2 * np.pi * f * t) * gate * tilt
+    return out / np.max(np.abs(out)) * 0.3
 
 
 def fade(x, seconds=4):
@@ -101,7 +140,7 @@ def main():
     for item in catalog["frequencies"]:
         sub = "audio/free" if item["tier"] == "free" else "premium/stream"
         out = os.path.join(ROOT, sub, item["id"] + ".flac")
-        write(render(item, LOOP_S), out)
+        write(render(item, item.get("loop", LOOP_S)), out)
         print(f"{item['tier']:5} {out[len(ROOT)+1:]}  {os.path.getsize(out)//1024} KB")
         if args.downloads:
             long = fade(render(item, args.minutes * 60))

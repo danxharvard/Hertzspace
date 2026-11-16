@@ -11,6 +11,11 @@
       "blurb": "Pure tones from the Solfeggio scale, popular in meditation and sound-bath practice."
     },
     {
+      "id": "golden",
+      "name": "Golden ratio",
+      "blurb": "Tones spaced by the golden ratio (1.618), cascading in one by one and resetting every few seconds. Best on headphones."
+    },
+    {
       "id": "binaural",
       "name": "Binaural beats",
       "blurb": "A slightly different tone in each ear. Your brain hears the difference as a slow pulse. Headphones required."
@@ -155,6 +160,58 @@
       "tier": "plus"
     },
     {
+      "id": "golden-528",
+      "freq": 528,
+      "name": "Golden 528",
+      "hz": "528 Hz × φ",
+      "short": "Cascading golden-ratio stack",
+      "about": "Thirteen tones spaced by the golden ratio around 528 Hz. They enter one by one from the top down, hold, then reset every seven seconds, alternating between your left and right ear.",
+      "category": "golden",
+      "type": "cascade",
+      "tier": "plus",
+      "loop": 14
+    },
+    {
+      "id": "golden-432",
+      "freq": 432,
+      "name": "Golden 432",
+      "hz": "432 Hz × φ",
+      "short": "Warmer golden-ratio cascade",
+      "about": "The same golden-ratio cascade built on 432 Hz, a little lower and warmer than 528.",
+      "category": "golden",
+      "type": "cascade",
+      "tier": "plus",
+      "loop": 14
+    },
+    {
+      "id": "golden-396",
+      "freq": 396,
+      "name": "Golden 396",
+      "hz": "396 Hz × φ",
+      "short": "Deep, grounding cascade",
+      "about": "A golden-ratio cascade on 396 Hz, the Solfeggio tone traditionally linked with letting go.",
+      "category": "golden",
+      "type": "cascade",
+      "tier": "plus",
+      "loop": 14
+    },
+    {
+      "id": "golden-528-drift",
+      "freq": 528,
+      "cycle": 14,
+      "step": 1.0,
+      "attack": 0.25,
+      "release": 0.8,
+      "loop": 28,
+      "name": "Golden drift",
+      "hz": "528 Hz × φ, slow",
+      "short": "Slow, soft cascade for sleep",
+      "about": "A slowed-down golden 528 cascade with soft edges. Each tone drifts in a second apart over a fourteen-second cycle. Gentle enough to fall asleep to.",
+      "category": "golden",
+      "type": "cascade",
+      "tier": "plus"
+    },
+    {
       "id": "delta-sleep",
       "category": "binaural",
       "type": "binaural",
@@ -231,7 +288,7 @@
     "price": "£4.99",
     "priceNote": "one-off",
     "perks": [
-      "Unlock 12 extra frequencies",
+      "Unlock 16 extra frequencies",
       "Download any frequency to your device",
       "Listen offline, anywhere"
     ]
